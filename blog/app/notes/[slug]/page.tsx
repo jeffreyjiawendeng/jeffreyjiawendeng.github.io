@@ -1,19 +1,19 @@
 import { notFound } from 'next/navigation'
 import { CustomMDX } from 'app/components/mdx'
-import { formatDate, getBlogPosts } from 'app/blog/utils'
+import { formatDate, getNotes } from 'app/notes/utils'
 import { baseUrl } from 'app/sitemap'
 
 export async function generateStaticParams() {
-  let posts = getBlogPosts()
+  let notes = getNotes()
 
-  return posts.map((post) => ({
-    slug: post.slug,
+  return notes.map((note) => ({
+    slug: note.slug,
   }))
 }
 
 export function generateMetadata({ params }) {
-  let post = getBlogPosts().find((post) => post.slug === params.slug)
-  if (!post) {
+  let note = getNotes().find((note) => note.slug === params.slug)
+  if (!note) {
     return
   }
 
@@ -22,7 +22,7 @@ export function generateMetadata({ params }) {
     publishedAt: publishedTime,
     summary: description,
     image,
-  } = post.metadata
+  } = note.metadata
   let ogImage = image
     ? image
     : `${baseUrl}/og?title=${encodeURIComponent(title)}`
@@ -35,7 +35,7 @@ export function generateMetadata({ params }) {
       description,
       type: 'article',
       publishedTime,
-      url: `${baseUrl}/blog/${post.slug}`,
+      url: `${baseUrl}/notes/${note.slug}`,
       images: [
         {
           url: ogImage,
@@ -51,10 +51,10 @@ export function generateMetadata({ params }) {
   }
 }
 
-export default function Blog({ params }) {
-  let post = getBlogPosts().find((post) => post.slug === params.slug)
+export default function Note({ params }) {
+  let note = getNotes().find((note) => note.slug === params.slug)
 
-  if (!post) {
+  if (!note) {
     notFound()
   }
 
@@ -66,32 +66,32 @@ export default function Blog({ params }) {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
-            headline: post.metadata.title,
-            datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
-            description: post.metadata.summary,
-            image: post.metadata.image
-              ? `${baseUrl}${post.metadata.image}`
-              : `/og?title=${encodeURIComponent(post.metadata.title)}`,
-            url: `${baseUrl}/blog/${post.slug}`,
+            '@type': 'Article',
+            headline: note.metadata.title,
+            datePublished: note.metadata.publishedAt,
+            dateModified: note.metadata.publishedAt,
+            description: note.metadata.summary,
+            image: note.metadata.image
+              ? `${baseUrl}${note.metadata.image}`
+              : `/og?title=${encodeURIComponent(note.metadata.title)}`,
+            url: `${baseUrl}/notes/${note.slug}`,
             author: {
               '@type': 'Person',
-              name: 'My Portfolio',
+              name: 'Jeffrey Deng',
             },
           }),
         }}
       />
       <h1 className="title font-semibold text-2xl tracking-tighter">
-        {post.metadata.title}
+        {note.metadata.title}
       </h1>
       <div className="flex justify-between items-center mt-2 mb-8 text-sm">
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
-          {formatDate(post.metadata.publishedAt)}
+          {formatDate(note.metadata.publishedAt)}
         </p>
       </div>
       <article className="prose">
-        <CustomMDX source={post.content} />
+        <CustomMDX source={note.content} />
       </article>
     </section>
   )
