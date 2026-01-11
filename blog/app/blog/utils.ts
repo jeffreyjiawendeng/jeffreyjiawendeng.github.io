@@ -6,6 +6,7 @@ type Metadata = {
   publishedAt: string
   summary: string
   image?: string
+  tags?: string[]
 }
 
 function parseFrontmatter(fileContent: string) {
@@ -19,20 +20,34 @@ function parseFrontmatter(fileContent: string) {
   frontMatterLines.forEach((line) => {
     let [key, ...valueArr] = line.split(': ')
     let value = valueArr.join(': ').trim()
-    value = value.replace(/^['"](.*)['"]$/, '$1') // Remove quotes
-    metadata[key.trim() as keyof Metadata] = value
+    value = value.replace(/^['"](.*)['"]]*$/g, "$1")
+    
+    if (key.trim() === "tags") {
+      const tagsStr = value.replace(/[\[\]'"]/g, '')
+      metadata[key.trim() as keyof Metadata] = tagsStr.split(',').map(t => t.trim()) as any
+    } else {
+      metadata[key.trim() as keyof Metadata] = value as any
+    }
   })
 
   return { metadata: metadata as Metadata, content }
 }
 
 function getMDXFiles(dir) {
+  if (!fs.existsSync(dir)) {
+    return []
+  }
   return fs.readdirSync(dir).filter((file) => path.extname(file) === '.mdx')
 }
 
 function readMDXFile(filePath) {
-  let rawContent = fs.readFileSync(filePath, 'utf-8')
-  return parseFrontmatter(rawContent)
+  try {
+    let rawContent = fs.readFileSync(filePath, 'utf-8')
+    return parseFrontmatter(rawContent)
+  } catch (error) {
+    console.error(`Error reading file ${filePath}:`, error)
+    throw error
+  }
 }
 
 function getMDXData(dir) {

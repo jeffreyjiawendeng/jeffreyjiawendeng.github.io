@@ -31,6 +31,8 @@
 
 html {
   min-width: 360px;
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
 }
 
 .prose .anchor {

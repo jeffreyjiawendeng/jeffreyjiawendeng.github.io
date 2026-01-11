@@ -1,17 +1,17 @@
-import Link from 'next/link'
+import Link from "next/link"
 
 const navItems = {
-  '/': {
-    name: 'home',
+  "/": {
+    name: "about me",
   },
-  '/blog': {
-    name: 'blog',
+  "/projects": {
+    name: "projects",
   },
-  '/projects': {
-    name: 'projects',
+  "/blog": {
+    name: "blog",
   },
-  '/notes': {
-    name: 'notes',
+  "/notes": {
+    name: "notes",
   },
 }
 
@@ -29,7 +29,7 @@ export function Navbar() {
                 <Link
                   key={path}
                   href={path}
-                  className="transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1"
+                  className="transition-all duration-300 hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-900"
                 >
                   {name}
                 </Link>

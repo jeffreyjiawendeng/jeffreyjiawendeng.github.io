@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation'
-import { CustomMDX } from 'app/components/mdx'
-import { formatDate, getNotes } from 'app/notes/utils'
-import { baseUrl } from 'app/sitemap'
+import { notFound } from "next/navigation"
+import { CustomMDX } from "app/components/mdx"
+import { formatDate, getNotes } from "app/notes/utils"
+import { baseUrl } from "app/sitemap"
 
 export async function generateStaticParams() {
   let notes = getNotes()
@@ -11,8 +11,9 @@ export async function generateStaticParams() {
   }))
 }
 
-export function generateMetadata({ params }) {
-  let note = getNotes().find((note) => note.slug === params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  let { slug } = await params
+  let note = getNotes().find((note) => note.slug === slug)
   if (!note) {
     return
   }
@@ -33,7 +34,7 @@ export function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      type: 'article',
+      type: "article",
       publishedTime,
       url: `${baseUrl}/notes/${note.slug}`,
       images: [
@@ -43,7 +44,7 @@ export function generateMetadata({ params }) {
       ],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title,
       description,
       images: [ogImage],
@@ -51,8 +52,9 @@ export function generateMetadata({ params }) {
   }
 }
 
-export default function Note({ params }) {
-  let note = getNotes().find((note) => note.slug === params.slug)
+export default async function Note({ params }: { params: Promise<{ slug: string }> }) {
+  let { slug } = await params
+  let note = getNotes().find((note) => note.slug === slug)
 
   if (!note) {
     notFound()
@@ -65,8 +67,8 @@ export default function Note({ params }) {
         suppressHydrationWarning
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Article',
+            "@context": "https://schema.org",
+            "@type": "Article",
             headline: note.metadata.title,
             datePublished: note.metadata.publishedAt,
             dateModified: note.metadata.publishedAt,
@@ -76,8 +78,8 @@ export default function Note({ params }) {
               : `/og?title=${encodeURIComponent(note.metadata.title)}`,
             url: `${baseUrl}/notes/${note.slug}`,
             author: {
-              '@type': 'Person',
-              name: 'Jeffrey Deng',
+              "@type": "Person",
+              name: "Jeffrey Deng",
             },
           }),
         }}

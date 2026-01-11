@@ -1,38 +1,53 @@
-import fs from 'fs'
-import path from 'path'
+import fs from "fs"
+import path from "path"
 
 type Metadata = {
   title: string
   publishedAt: string
   summary: string
   image?: string
+  tags?: string[]
 }
 
 function parseFrontmatter(fileContent: string) {
   let frontmatterRegex = /---\s*([\s\S]*?)\s*---/
   let match = frontmatterRegex.exec(fileContent)
   let frontMatterBlock = match![1]
-  let content = fileContent.replace(frontmatterRegex, '').trim()
-  let frontMatterLines = frontMatterBlock.trim().split('\n')
+  let content = fileContent.replace(frontmatterRegex, "").trim()
+  let frontMatterLines = frontMatterBlock.trim().split("\n")
   let metadata: Partial<Metadata> = {}
 
   frontMatterLines.forEach((line) => {
     let [key, ...valueArr] = line.split(': ')
     let value = valueArr.join(': ').trim()
-    value = value.replace(/^['"](.*)['"]$/, '$1') // Remove quotes
-    metadata[key.trim() as keyof Metadata] = value
+    value = value.replace(/^['"](.*)['"]]*$/g, "$1")
+    
+    if (key.trim() === "tags") {
+      const tagsStr = value.replace(/[\[\]'"]/g, '')
+      metadata[key.trim() as keyof Metadata] = tagsStr.split(',').map(t => t.trim()) as any
+    } else {
+      metadata[key.trim() as keyof Metadata] = value as any
+    }
   })
 
   return { metadata: metadata as Metadata, content }
 }
 
 function getMDXFiles(dir) {
-  return fs.readdirSync(dir).filter((file) => path.extname(file) === '.mdx')
+  if (!fs.existsSync(dir)) {
+    return []
+  }
+  return fs.readdirSync(dir).filter((file) => path.extname(file) === ".mdx")
 }
 
 function readMDXFile(filePath) {
-  let rawContent = fs.readFileSync(filePath, 'utf-8')
-  return parseFrontmatter(rawContent)
+  try {
+    let rawContent = fs.readFileSync(filePath, "utf-8")
+    return parseFrontmatter(rawContent)
+  } catch (error) {
+    console.error(`Error reading file ${filePath}:`, error)
+    throw error
+  }
 }
 
 function getMDXData(dir) {
@@ -50,12 +65,12 @@ function getMDXData(dir) {
 }
 
 export function getProjects() {
-  return getMDXData(path.join(process.cwd(), 'app', 'projects', 'posts'))
+  return getMDXData(path.join(process.cwd(), "app", "projects", "posts"))
 }
 
 export function formatDate(date: string, includeRelative = false) {
   let currentDate = new Date()
-  if (!date.includes('T')) {
+  if (!date.includes("T")) {
     date = `${date}T00:00:00`
   }
   let targetDate = new Date(date)
@@ -76,10 +91,10 @@ export function formatDate(date: string, includeRelative = false) {
     formattedDate = 'Today'
   }
 
-  let fullDate = targetDate.toLocaleString('en-us', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
+  let fullDate = targetDate.toLocaleString("en-us", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   })
 
   if (!includeRelative) {

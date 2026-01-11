@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation'
-import { CustomMDX } from 'app/components/mdx'
-import { formatDate, getProjects } from 'app/projects/utils'
-import { baseUrl } from 'app/sitemap'
+import { notFound } from "next/navigation"
+import { CustomMDX } from "app/components/mdx"
+import { formatDate, getProjects } from "app/projects/utils"
+import { baseUrl } from "app/sitemap"
 
 export async function generateStaticParams() {
   let projects = getProjects()
@@ -11,8 +11,9 @@ export async function generateStaticParams() {
   }))
 }
 
-export function generateMetadata({ params }) {
-  let project = getProjects().find((project) => project.slug === params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  let { slug } = await params
+  let project = getProjects().find((project) => project.slug === slug)
   if (!project) {
     return
   }
@@ -33,7 +34,7 @@ export function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      type: 'article',
+      type: "article",
       publishedTime,
       url: `${baseUrl}/projects/${project.slug}`,
       images: [
@@ -43,7 +44,7 @@ export function generateMetadata({ params }) {
       ],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title,
       description,
       images: [ogImage],
@@ -51,8 +52,9 @@ export function generateMetadata({ params }) {
   }
 }
 
-export default function Project({ params }) {
-  let project = getProjects().find((project) => project.slug === params.slug)
+export default async function Project({ params }: { params: Promise<{ slug: string }> }) {
+  let { slug } = await params
+  let project = getProjects().find((project) => project.slug === slug)
 
   if (!project) {
     notFound()
@@ -65,8 +67,8 @@ export default function Project({ params }) {
         suppressHydrationWarning
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Article',
+            "@context": "https://schema.org",
+            "@type": "Article",
             headline: project.metadata.title,
             datePublished: project.metadata.publishedAt,
             dateModified: project.metadata.publishedAt,
@@ -76,8 +78,8 @@ export default function Project({ params }) {
               : `/og?title=${encodeURIComponent(project.metadata.title)}`,
             url: `${baseUrl}/projects/${project.slug}`,
             author: {
-              '@type': 'Person',
-              name: 'Jeffrey Deng',
+              "@type": "Person",
+              name: "Jeffrey Deng",
             },
           }),
         }}
