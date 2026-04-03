@@ -8,7 +8,7 @@ export default function Page() {
         Hi! I&apos;m Jeff <span className="text-lg">:)</span>
       </p>
       <p className="mb-8 text-neutral-700 dark:text-neutral-300">
-        Welcome to my GitHub page!
+        Welcome to my About Me Page!
       </p>
 
       {/* General Information Section */}
